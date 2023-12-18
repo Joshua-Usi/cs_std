@@ -2,6 +2,7 @@
 
 #include "mikktspace/mikktspace.h"
 
+#include <array>
 
 namespace cs_std::graphics
 {
@@ -47,21 +48,38 @@ namespace cs_std::graphics
 	{
 		if (vertices.size() == 0)
 		{
-			this->min = this->max = math::vec3(0.0f);
+			min = max = math::vec3(0.0f);
 			return;
 		}
 
-		this->min.x = this->min.y = this->min.z = std::numeric_limits<float>::max();
-		this->max.x = this->max.y = this->max.z = std::numeric_limits<float>::lowest();
+		min.x = min.y = min.z = std::numeric_limits<float>::max();
+		max.x = max.y = max.z = std::numeric_limits<float>::lowest();
 
 		for (size_t i = 0; i < vertices.size(); i += 3) {
-			this->min.x = std::min(this->min.x, vertices[i]);
-			this->min.y = std::min(this->min.y, vertices[i + 1]);
-			this->min.z = std::min(this->min.z, vertices[i + 2]);
+			min.x = std::min(min.x, vertices[i]);
+			min.y = std::min(min.y, vertices[i + 1]);
+			min.z = std::min(min.z, vertices[i + 2]);
 
-			this->max.x = std::max(this->max.x, vertices[i]);
-			this->max.y = std::max(this->max.y, vertices[i + 1]);
-			this->max.z = std::max(this->max.z, vertices[i + 2]);
+			max.x = std::max(max.x, vertices[i]);
+			max.y = std::max(max.y, vertices[i + 1]);
+			max.z = std::max(max.z, vertices[i + 2]);
+		}
+	}
+	bounding_aabb::bounding_aabb(const std::vector<bounding_aabb>& aabbs)
+	{
+		// Combine the aabbs into one large aabb
+		min.x = min.y = min.z = std::numeric_limits<float>::max();
+		max.x = max.y = max.z = std::numeric_limits<float>::lowest();
+
+		for (const bounding_aabb& aabb : aabbs)
+		{
+			min.x = std::min(min.x, aabb.min.x);
+			min.y = std::min(min.y, aabb.min.y);
+			min.z = std::min(min.z, aabb.min.z);
+
+			max.x = std::max(max.x, aabb.max.x);
+			max.y = std::max(max.y, aabb.max.y);
+			max.z = std::max(max.z, aabb.max.z);
 		}
 	}
 	bounding_aabb& bounding_aabb::transform(const math::mat4& transform)
@@ -86,8 +104,20 @@ namespace cs_std::graphics
 			newMax = math::max(newMax, transformedCorners[i]);
 		}
 
-		this->min = newMin;
-		this->max = newMax;
+		min = newMin;
+		max = newMax;
+
+		return *this;
+	}
+	bounding_aabb& bounding_aabb::merge(const bounding_aabb& other)
+	{
+		min.x = std::min(min.x, other.min.x);
+		min.y = std::min(min.y, other.min.y);
+		min.z = std::min(min.z, other.min.z);
+
+		max.x = std::max(max.x, other.max.x);
+		max.y = std::max(max.y, other.max.y);
+		max.z = std::max(max.z, other.max.z);
 
 		return *this;
 	}
@@ -114,8 +144,8 @@ namespace cs_std::graphics
 		for (uint8_t i = 0; i < 6; i++)
 		{
 			const math::vec4 norm = math::normalize(coefficient[i]);
-			this->planes[i].normal = math::vec3(norm);
-			this->planes[i].distance = norm.w;
+			planes[i].normal = math::vec3(norm);
+			planes[i].distance = norm.w;
 		}
 	}
 	bool frustum::intersects(const bounding_aabb& volume) const
@@ -124,8 +154,8 @@ namespace cs_std::graphics
 
 		for (uint8_t i = 0; i < 6; i++)
 		{
-			const math::vec3& normal = this->planes[i].normal;
-			const float distance = this->planes[i].distance;
+			const math::vec3& normal = planes[i].normal;
+			const float distance = planes[i].distance;
 
 			math::vec3 positiveVertex = min;
 			if (normal.x >= 0.0f) positiveVertex.x = max.x;
@@ -133,6 +163,31 @@ namespace cs_std::graphics
 			if (normal.z >= 0.0f) positiveVertex.z = max.z;
 
 			if (math::dot(normal, positiveVertex) + distance < 0.0f) return false;
+		}
+		return true;
+	}
+	bool frustum::contains(const bounding_aabb& volume) const {
+		const std::array<math::vec3, 8> corners
+		{ {
+			{volume.min.x, volume.min.y, volume.min.z},
+			{volume.min.x, volume.min.y, volume.max.z},
+			{volume.min.x, volume.max.y, volume.min.z},
+			{volume.min.x, volume.max.y, volume.max.z},
+			{volume.max.x, volume.min.y, volume.min.z},
+			{volume.max.x, volume.min.y, volume.max.z},
+			{volume.max.x, volume.max.y, volume.min.z},
+			{volume.max.x, volume.max.y, volume.max.z}
+		} };
+
+		for (const auto& p : planes)
+		{
+			bool allCornersInside = true;
+			for (const auto& corner : corners)
+			{
+				float distance = math::dot(p.normal, corner) + p.distance;
+				if (distance < 0) { allCornersInside = false; break; }
+			}
+			if (!allCornersInside) return false;
 		}
 		return true;
 	}
@@ -156,7 +211,6 @@ namespace cs_std::graphics
 		context.m_pUserData = &inputMesh;
 
 		const bool result = genTangSpaceDefault(&context);
-
 		// TODO we should do something if we error
 	}
 }

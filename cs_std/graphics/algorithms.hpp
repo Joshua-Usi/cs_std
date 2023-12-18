@@ -17,8 +17,10 @@ namespace cs_std::graphics
 		bounding_aabb() : min(0.0f), max(0.0f) {}
 		bounding_aabb(const math::vec3& min, const math::vec3& max) : min(min), max(max) {}
 		bounding_aabb(const std::vector<float>& vertices);
+		bounding_aabb(const std::vector<bounding_aabb>& aabbs);
 
 		bounding_aabb& transform(const math::mat4& transform);
+		bounding_aabb& merge(const bounding_aabb& other);
 	};
 
 	struct frustum
@@ -32,5 +34,7 @@ namespace cs_std::graphics
 		frustum(const math::mat4& viewProjection);
 		// True if fully inside or partially intersects
 		bool intersects(const bounding_aabb& volume) const;
+		// True only if fully inside
+		bool contains(const bounding_aabb& volume) const;
 	};
 }
