@@ -6,6 +6,8 @@
 namespace cs_std
 {
 	// Vector-like with log(n) insertion and deletion
+	// Gaurantees that the indices of the elements will not change
+	// Guarantees that the empty blocks closest to the start of the vector will be filled first
 	template<typename T>
 	class packed_vector
 	{
