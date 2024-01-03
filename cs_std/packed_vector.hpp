@@ -2,6 +2,9 @@
 
 #include <vector>
 #include <set>
+#include <stack>
+
+#define CS_STD_PACKED_VECTOR_CLEAR_ON_ERASE
 
 namespace cs_std
 {
@@ -15,7 +18,6 @@ namespace cs_std
 		struct free_block
 		{
 			size_t start, length;
-			free_block(size_t start, size_t length) : start(start), length(length) {}
 			// Used by the set to sort the free blocks
 			bool operator<(const free_block& other) const { return start < other.start; }
 		};
@@ -33,10 +35,7 @@ namespace cs_std
 				free_blocks.erase(it);
 				free_blocks.insert(modifiedBlock);
 			}
-			else
-			{
-				free_blocks.erase(it);
-			}
+			else free_blocks.erase(it);
 			return index;
 		}
 	public:
@@ -68,21 +67,31 @@ namespace cs_std
 				return vector.size() - 1;
 			}
 		}
-		void replace(size_t index, const T& item)
+		template<typename... Args>
+		[[nodiscard]] size_t emplace(Args&&... args)
 		{
-			vector[index].~T();
-			vector[index] = item;
+			if (!free_blocks.empty())
+			{
+				size_t index = remove_first_empty_block();
+				vector[index] = T(std::forward<Args>(args)...);
+				return index;
+			}
+			else
+			{
+				vector.emplace_back(std::forward<Args>(args)...);
+				return vector.size() - 1;
+			}
 		}
-		void replace(size_t index, T&& item)
+		void replace(size_t index, const T& item) { vector[index].~T(); vector[index] = item; }
+		void replace(size_t index, T&& item) { vector[index].~T(); vector[index] = std::move(item); }
+		void erase(size_t index)
 		{
-			vector[index].~T();
-			vector[index] = std::move(item);
-		}
-		void erase(size_t index) {
 			// clear the value at the index.
 			// Could potentially be faster to just leave it as is.
 			vector[index].~T();
-			vector[index] = T();
+			#ifdef CS_STD_PACKED_VECTOR_CLEAR_ON_ERASE
+				vector[index] = T();
+			#endif
 			auto next_it = free_blocks.lower_bound(free_block(index, 0));
 			auto prev_it = (next_it == free_blocks.begin()) ? free_blocks.end() : std::prev(next_it);
 			bool merged = false;
@@ -103,9 +112,29 @@ namespace cs_std
 			}
 			if (!merged) free_blocks.insert(free_block(index, 1));
 		}
+		bool is_valid(size_t index) const
+		{
+			if (index >= vector.size()) return false;
+			for (auto& block : free_blocks)
+			{
+				if (index >= block.start && index < block.start + block.length) return false;
+			}
+			return true;
+		}
+		// Return the number of valid elements in the vector
+		size_t size() const
+		{
+			size_t validSize = vector.size();
+			for (auto& block : free_blocks) validSize -= block.length;
+			return validSize;
+		}
+		// Return the total size of the vector, including empty slots
 		size_t capacity() const { return vector.size(); }
 		void clear() { vector.clear(); free_blocks.clear(); }
+		// Exception safe
+		T& at(size_t index) { return vector.at(index); }
 	public:
+		// Exception unsafe, but faster
 		T& operator[](size_t index) { return vector[index]; }
 		const T& operator[](size_t index) const { return vector[index]; }
 	};
