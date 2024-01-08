@@ -17,4 +17,5 @@ namespace cs_std
 		static_cast<uint8_t>(console::severity_bits::error) |
 		static_cast<uint8_t>(console::severity_bits::fatal);
 	bool console::printSeverity = true, console::printTimestamp = true;
+	std::chrono::time_point<std::chrono::steady_clock> console::timePoint = std::chrono::high_resolution_clock::now();
 }

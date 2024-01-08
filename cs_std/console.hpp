@@ -9,6 +9,14 @@
 
 namespace cs_std
 {
+	template <typename T>
+	concept TimeUnit = std::is_convertible_v<T, std::chrono::nanoseconds> ||
+		std::is_convertible_v<T, std::chrono::microseconds> ||
+		std::is_convertible_v<T, std::chrono::milliseconds> ||
+		std::is_convertible_v<T, std::chrono::seconds> ||
+		std::is_convertible_v<T, std::chrono::minutes> ||
+		std::is_convertible_v<T, std::chrono::hours>;
+
 	// Javascript-like logger for C++
 	class console
 	{
@@ -30,6 +38,7 @@ namespace cs_std
 		static std::mutex threadMutex;
 		static severity displayedSeverities;
 		static bool printSeverity, printTimestamp;
+		static std::chrono::time_point<std::chrono::steady_clock> timePoint;
 
 		template<typename... Ts>
 		static void base_log(severity_bits severity, Ts&&... args)
@@ -96,5 +105,8 @@ namespace cs_std
 		static void print_timestamps(bool enable) { printTimestamp = enable; }
 		// Whether or not to print the severity of the log	
 		static void print_severity(bool enable) { printSeverity = enable; }
+
+		static void begin() { timePoint = std::chrono::high_resolution_clock::now(); }
+		template<typename TimeUnit = std::chrono::seconds> static size_t end() { return std::chrono::duration_cast<TimeUnit>(std::chrono::high_resolution_clock::now() - timePoint).count(); }
 	};
 }
