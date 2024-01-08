@@ -15,7 +15,7 @@ namespace cs_std
 	{
 	private:
 		cs_std::thread_safe_queue<std::function<void()>> tasks;
-		std::vector<std::thread> threads;
+		std::vector<std::jthread> threads;
 		std::atomic<bool> isRunning;
 		std::atomic<size_t> activeThreads;
 	public:
@@ -33,7 +33,7 @@ namespace cs_std
 			if (!this->isRunning) return;
 			this->isRunning = false;
 			this->tasks.unlock();
-			for (auto& thread : this->threads) thread.join();
+			this->threads.clear();
 		}
 		// Threads will be awoken and begin executing tasks
 		void wake(size_t threadOverride = std::numeric_limits<size_t>::max())

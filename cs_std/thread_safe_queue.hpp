@@ -32,6 +32,8 @@ namespace cs_std
 			this->queue.push(std::move(value));
 			this->condition.notify_one();
 		}
+		// Returns the front element without popping it.
+		// We return a copy to prevent data race issues
 		T front() const
 		{
 			std::lock_guard<std::mutex> lock(this->mutex);
@@ -61,7 +63,7 @@ namespace cs_std
 		}
 		bool empty() const
 		{
-			std::lock_guard<std::mutex> lock(this->mutex);
+			std::lock_guard lock(this->mutex);
 			return this->queue.empty();
 		}
 		// Returns if the queue is empty without locking it
@@ -71,7 +73,7 @@ namespace cs_std
 		}
 		size_t size() const
 		{
-			std::lock_guard<std::mutex> lock(this->mutex);
+			std::lock_guard lock(this->mutex);
 			return this->queue.size();
 		}
 		// Returns the size of the queue without locking it
@@ -79,10 +81,10 @@ namespace cs_std
 		{
 			return this->queue.size();
 		}
-		// Unlock the queue and allow all threads to continue, all pop operations will return nullopts
+		// Unlock the queue and allow all threads to continue, all pop operations will return an element or nullopts
 		void unlock()
 		{
-			std::lock_guard<std::mutex> lock(this->mutex);
+			std::lock_guard lock(this->mutex);
 			this->unlocked = true;
 			this->condition.notify_all();
 		}
