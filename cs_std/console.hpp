@@ -6,6 +6,7 @@
 #include <sstream>
 #include <chrono>
 #include <iostream>
+#include <type_traits>
 
 namespace cs_std
 {
@@ -61,7 +62,10 @@ namespace cs_std
 				std::cout << '[' << std::put_time(std::localtime(&time), "%T") << "] ";
 			}
 			if (printSeverity) std::cout << '[' << SEVERITY_STRINGS[static_cast<size_t>(std::log2(static_cast<double>(severity)))] << "] ";
-			([&] { std::cout << args << ' '; } (), ...);
+			([&] {
+				if constexpr (std::is_same_v<std::decay_t<Ts>, bool>) std::cout << (args ? "true" : "false") << ' ';
+				else std::cout << args << ' ';
+			} (), ...);
 			std::cout << "\n";
 		}
 		template<typename... Ts> static void raw_base(Ts&&... args) { ([&] { std::cout << args; } (), ...); }

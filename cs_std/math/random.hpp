@@ -22,6 +22,6 @@ namespace cs_std::math
 	template<typename T = int64_t>
 	T random(T low = 0.0, T high = 1.0)
 	{
-		return static_cast<T>(random_engine::default_engine.double_range(static_cast<double>(low), static_cast<double>(high) + 1.0f));
+		return static_cast<T>(random_engine::default_engine.double_range(static_cast<double>(low), static_cast<double>(high)));
 	}
 }
