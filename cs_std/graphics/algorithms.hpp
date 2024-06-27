@@ -8,7 +8,7 @@ namespace cs_std::graphics
 {
 
 	// Generate the tangents for a specific mesh
-	void generate_tangents(mesh& inputMesh);
+	void generate_tangents(mesh<uint32_t>& inputMesh);
 
 	struct bounding_aabb
 	{

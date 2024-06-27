@@ -14,26 +14,26 @@ namespace cs_std::graphics
 			return 3;
 		}
 		int get_face_count(const SMikkTSpaceContext* pContext) {
-			const mesh* pMesh = static_cast<mesh*>(pContext->m_pUserData);
+			const mesh<uint32_t>* pMesh = static_cast<mesh<uint32_t>*>(pContext->m_pUserData);
 			return pMesh->indices.size() / 3;
 		}
 		void get_position(const SMikkTSpaceContext* pContext, float fvPosOut[], const int iFace, const int iVert) {
-			const mesh* pMesh = static_cast<mesh*>(pContext->m_pUserData);
+			const mesh<uint32_t>* pMesh = static_cast<mesh<uint32_t>*>(pContext->m_pUserData);
 			const int index = pMesh->indices[iFace * 3 + iVert];
 			memcpy(fvPosOut, &pMesh->get_attribute(Attribute::POSITION).data[index * 3], sizeof(float) * 3);
 		}
 		void get_normal(const SMikkTSpaceContext* pContext, float fvNormOut[], const int iFace, const int iVert) {
-			const mesh* pMesh = static_cast<mesh*>(pContext->m_pUserData);
+			const mesh<uint32_t>* pMesh = static_cast<mesh<uint32_t>*>(pContext->m_pUserData);
 			const int index = pMesh->indices[iFace * 3 + iVert];
 			memcpy(fvNormOut, &pMesh->get_attribute(Attribute::NORMAL).data[index * 3], sizeof(float) * 3);
 		}
 		void get_tex_coord(const SMikkTSpaceContext* pContext, float fvTexcOut[], const int iFace, const int iVert) {
-			const mesh* pMesh = static_cast<mesh*>(pContext->m_pUserData);
+			const mesh<uint32_t>* pMesh = static_cast<mesh<uint32_t>*>(pContext->m_pUserData);
 			const int index = pMesh->indices[iFace * 3 + iVert];
 			memcpy(fvTexcOut, &pMesh->get_attribute(Attribute::TEXCOORD_0).data[index * 2], sizeof(float) * 2);
 		}
 		void set_tangent_space_basic(const SMikkTSpaceContext* pContext, const float fvTangent[], const float fSign, const int iFace, const int iVert) {
-			mesh* pMesh = static_cast<mesh*>(pContext->m_pUserData);
+			mesh<uint32_t>* pMesh = static_cast<mesh<uint32_t>*>(pContext->m_pUserData);
 			const int index = pMesh->indices[iFace * 3 + iVert];
 
 			std::vector<float>& tangents = pMesh->get_attribute(Attribute::TANGENT).data;
@@ -191,7 +191,7 @@ namespace cs_std::graphics
 		}
 		return true;
 	}
-	void generate_tangents(mesh& inputMesh)
+	void generate_tangents(mesh<uint32_t>& inputMesh)
 	{
 		if (!inputMesh.has_attribute(Attribute::TANGENT)) inputMesh.add_attribute(Attribute::TANGENT, {});
 

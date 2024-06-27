@@ -9,6 +9,9 @@
 
 namespace cs_std::graphics
 {
+	template<typename T>
+	concept valid_index_type = requires { std::same_as<T, uint32_t> || std::same_as<T, uint16_t>; };
+
 	/// <summary>
 	/// Defines attribute flags for a mesh
 	/// Based off the minimum required attributes for a gltf compliant renderer
@@ -41,10 +44,11 @@ namespace cs_std::graphics
 	};
 
 	// Specifies the data for a mesh
+	template<valid_index_type index_type = uint32_t>
 	struct mesh
 	{
 		std::vector<shader_attribute> attributes;
-		std::vector<uint32_t> indices;
+		std::vector<index_type> indices;
 
 		// Constructor
 		mesh() = default;
@@ -127,13 +131,13 @@ namespace cs_std::graphics
 	struct model
 	{
 		// Mesh data
-		std::vector<mesh> meshes;
+		std::vector<mesh<uint32_t>> meshes;
 		// Mesh attributes
 		std::vector<mesh_attributes> meshAttributes;
 
 		// Constructor
 		model() = default;
-		model(const std::vector<mesh>& meshes, const std::vector<mesh_attributes>& meshTexturePaths) : meshes(meshes), meshAttributes(meshAttributes) {}
+		model(const std::vector<mesh<uint32_t>>& meshes, const std::vector<mesh_attributes>& meshTexturePaths) : meshes(meshes), meshAttributes(meshAttributes) {}
 		// Destructor
 		~model() = default;
 		// Copy
@@ -143,7 +147,7 @@ namespace cs_std::graphics
 		model(model&& other) noexcept = default;
 		model& operator=(model&& other) noexcept = default;
 
-		void add_mesh(const mesh& mesh, const mesh_attributes& meshAttributes)
+		void add_mesh(const mesh<uint32_t>& mesh, const mesh_attributes& meshAttributes)
 		{
 			this->meshes.push_back(mesh);
 			this->meshAttributes.push_back(meshAttributes);
