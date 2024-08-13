@@ -33,6 +33,7 @@ namespace cs_std::xml
 		attribute_container(const std::map<std::string, std::string>& attributes) : attributes(attributes) {}
 	public:
 		std::string& get_attribute(const std::string& attributeName) { return attributes[attributeName]; }
+		bool has_attribute(const std::string& attributeName) const { return attributes.find(attributeName) != attributes.end(); }
 		void set_attribute(const std::string& attributeName, const std::string& attributeValue) { attributes[attributeName] = attributeValue; }
 		void remove_attribute(const std::string& attributeName) { attributes.erase(attributeName); }
 		size_t attribute_count() const { return attributes.size(); }
