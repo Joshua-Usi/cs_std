@@ -54,7 +54,7 @@ namespace cs_std::xml::internal
 				workingNode = workingNode->first_node();
 				csWorkingNode = new node(csWorkingNode, "");
 			}
-			else if (workingNode->next_sibling())
+			else if (workingNode && workingNode->parent() && workingNode->next_sibling())
 			{
 				wasLastOperationUp = false;
 
@@ -65,9 +65,9 @@ namespace cs_std::xml::internal
 			{
 				wasLastOperationUp = true;
 
-				workingNode = workingNode->parent();
-				csWorkingNode = csWorkingNode->_parent();
+				workingNode = (workingNode == nullptr) ? nullptr : workingNode->parent();
+				csWorkingNode = (csWorkingNode == nullptr) ? nullptr : csWorkingNode->_parent();
 			}
-		} while (workingNode != rootNode);
+		} while (workingNode != nullptr && workingNode != rootNode);
 	};
 }
