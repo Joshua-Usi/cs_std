@@ -34,6 +34,7 @@ namespace cs_std::xml::internal
 		{
 			if (!wasLastOperationUp)
 			{
+				if (workingNode == nullptr) continue;
 				csWorkingNode->tag = workingNode->name();
 				csWorkingNode->innerText = workingNode->value();
 				// Assign RapidXML attributes to CrescendoXML document attributes
