@@ -25,6 +25,7 @@ namespace cs_std
 			this->stream.close();
 		}
 		bool exists() const { return std::filesystem::exists(this->file_path); }
+		static bool exists(const std::filesystem::path& filePath) { return std::filesystem::exists(filePath); }
 		bool is_open() const { return this->stream.is_open(); }
 		void create()
 		{
@@ -104,10 +105,14 @@ namespace cs_std
 		}
 		binary_file& append(const std::vector<byte>& data)
 		{
+			return this->append(data.data(), data.size());
+		}
+		binary_file& append(const void* data, size_t size)
+		{
 			if (!this->is_open()) throw std::runtime_error("File is not open.");
 			this->stream.seekp(0, std::ios::end);
 			if (!this->stream.good()) throw std::runtime_error("Failed to seek to the end of the binary file.");
-			this->stream.write(reinterpret_cast<const char*>(data.data()), data.size());
+			this->stream.write(reinterpret_cast<const char*>(data), size);
 			if (this->stream.fail()) throw std::runtime_error("Error occurred while writing to the binary file.");
 			return *this;
 		}
@@ -131,10 +136,13 @@ namespace cs_std
 			std::string buffer;
 			buffer.resize(count);
 			this->stream.read(&buffer[0], count);
+			size_t chars_read = this->stream.gcount();
+			buffer.resize(chars_read); // Adjust the size based on actual characters read
 
 			if (this->stream.fail() && !this->stream.eof()) throw std::runtime_error("Error occurred while reading from the text file.");
 			return buffer;
 		}
+
 		std::string read()
 		{
 			return this->read(0, this->size());
@@ -158,6 +166,15 @@ namespace cs_std
 		{
 			this->append(data);
 			this->append("\n");
+			return *this;
+		}
+		text_file& insert(const std::string& data, size_t position)
+		{
+			if (!this->is_open()) throw std::runtime_error("File is not open.");
+			this->stream.seekp(position, std::ios::beg);
+			if (!this->stream.good()) throw std::runtime_error("Failed to seek to the specified position in the text file.");
+			this->stream.write(data.c_str(), data.size());
+			if (this->stream.fail()) throw std::runtime_error("Error occurred while writing to the text file.");
 			return *this;
 		}
 	};
