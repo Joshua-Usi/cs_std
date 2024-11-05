@@ -1,5 +1,4 @@
 #pragma once
-
 #include <queue>
 #include <mutex>
 #include <condition_variable>
@@ -20,6 +19,8 @@ namespace cs_std
 		~thread_safe_queue() = default;
 		thread_safe_queue(const thread_safe_queue<T>& other) = delete;
 		thread_safe_queue<T>& operator=(const thread_safe_queue<T>& other) = delete;
+		thread_safe_queue(thread_safe_queue<T>&& other) noexcept = delete;
+		thread_safe_queue<T>& operator=(thread_safe_queue<T>&& other) noexcept = delete;
 		void push(const T& value)
 		{
 			std::lock_guard<std::mutex> lock(this->mutex);

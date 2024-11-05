@@ -1,7 +1,6 @@
 #include "algorithms.hpp"
-
+#include "../math/math.hpp"
 #include "mikktspace/mikktspace.h"
-
 #include <array>
 
 namespace cs_std::graphics

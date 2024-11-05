@@ -1,7 +1,6 @@
 #pragma once
 
 #include "model.hpp"
-
 #include <vector>
 
 namespace cs_std::graphics

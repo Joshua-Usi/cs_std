@@ -1,9 +1,7 @@
 #pragma once
-
 #include <thread>
 #include <functional>
 #include <atomic>
-
 #include "thread_safe_queue.hpp"
 
 namespace cs_std
@@ -63,10 +61,10 @@ namespace cs_std
 		void push_back(const std::function<void()>& function) { this->tasks.push(function); }
 		// Blocks calling thread until all tasks are finished
 		void wait_till_finished() { while (!this->finished()) std::this_thread::yield(); }
-		bool finished() const { return this->tasks.empty_unsafe() && this->activeThreads == 0; }
+		bool finished() const { return this->tasks.empty() && this->activeThreads == 0; }
 		size_t thread_count() const { return this->threads.size(); }
 		// Number of threads currently executing tasks
 		size_t active_thread_count() const { return this->activeThreads; }
-		size_t pending_task_count() const { return this->tasks.size_unsafe(); }
+		size_t pending_task_count() const { return this->tasks.size(); }
 	};
 }

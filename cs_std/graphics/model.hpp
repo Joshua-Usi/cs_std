@@ -1,10 +1,8 @@
-	#pragma once
-
+#pragma once
 #include <cstdint>
 #include <vector>
 #include <algorithm>
 #include <filesystem>
-
 #include "../math/math.hpp"
 
 namespace cs_std::graphics

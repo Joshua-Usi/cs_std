@@ -2,7 +2,7 @@
 
 namespace cs_std
 {
-	static const int desync_io = []() {
+	const int desync_io = []() {
 		std::ios::sync_with_stdio(false);
 		std::cin.tie(nullptr);
 		return 0;

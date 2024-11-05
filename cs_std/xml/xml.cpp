@@ -1,13 +1,8 @@
 #include "xml.hpp"
-
-#include "../file.hpp"
 #include "../console.hpp"
-
 #include "cs_std_to_rapid.hpp"
 #include "rapid_to_cs_std.hpp"
-
 #include "rapidxml/rapidxml.hpp"
-#include "rapidxml/rapidxml_ext.hpp"
 #include "rapidxml/rapidxml_print.hpp"
 
 namespace cs_std::xml

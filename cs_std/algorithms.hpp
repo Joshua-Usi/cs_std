@@ -1,8 +1,4 @@
 #pragma once
-
-#include <cmath>
-#include <algorithm>
-#include <limits>
 #include <vector>
 
 namespace cs_std

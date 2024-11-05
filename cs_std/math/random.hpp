@@ -1,7 +1,5 @@
 #pragma once
-
 #include <cstdint>
-#include <limits>
 
 namespace cs_std::math
 {
